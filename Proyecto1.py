@@ -1,6 +1,9 @@
 import pandas as pd     # Es la forma de importar la librería de pandas
 import seaborn as sns   # Es la forma de importar la librería de seaborn
 from sklearn.linear_model import LogisticRegression # Importamos la librería de regresión logística de sckitlearn
+from sklearn.model_selection import train_test_split
+import numpy as np
+from sklearn.metrics import accuracy_score
 
 
 # Data frame es como una hoja de cálculo compuesto por series, cada serie se pued einterpretar como una columna.
@@ -71,20 +74,66 @@ datos_EEG.VideoID.unique()
 
 # Dummies de SubjectID
 Subject_ID=pd.get_dummies(datos_EEG.SubjectID)
-Subject_ID=pd.get_dummies(datos_EEG.SubjectID,prefix='SubjectID')
+Subject_ID=pd.get_dummies(datos_EEG.SubjectID,prefix='SuID')
 Subject_ID
 # Dummies de VideoID
 Video_ID=pd.get_dummies(datos_EEG.VideoID)
-Video_ID=pd.get_dummies(datos_EEG.VideoID,prefix='VideoID')
+Video_ID=pd.get_dummies(datos_EEG.VideoID,prefix='ViID')
 Video_ID
 
 # Entonces ahora vamos a poner estas variables en nuestras variables de predicción
-x=pd.concat([pd.get_dummies(datos_EEG.SubjectID,prefix='SubjectID'),pd.get_dummies(datos_EEG.VideoID,prefix='VideoID'),datos_EEG.drop(['SubjectID','VideoID'],axis=1)],axis=1)
-x
+x_conca=pd.concat([pd.get_dummies(datos_EEG.SubjectID,prefix='SuID'),pd.get_dummies(datos_EEG.VideoID,prefix='ViID'),datos_EEG.drop(['SubjectID','VideoID'],axis=1)],axis=1)
+x_conca
+x_conca.info()
+
+# Se elige aleatoriamente quién es el conjunto de entrenamiento y quién es el conjunto de prueba
+x=x_conca.drop(['user-definedlabeln'],axis=1)
+y=x_conca[["user-definedlabeln"]]
+x_entre, x_prueba, y_entre, y_prueba = train_test_split(x.values, y.values, test_size=0.05, random_state=42)
+#x_entre.info()
+#x_entre
+#y_entre.info()
+#y_entre
+#x_prueba.info()
+#y_prueba.info()
+#y_entre
+# Esto lo comentamos porque la prueba se realizó con el comando sample y repite algunos elementos de prueba que están en el entrenamiento
+#x=x_conca.sample(frac=0.9,replace=False,random_state=1)
+#x.info()    # Estos son los datos de entrenamiento
+#y=x_conca.sample(frac=0.1,replace=False,random_state=5)
+#y.info()    # Estos son los datos de pruebas
+
+# Vamos a utilizar libría sckitlearn para hacer la predicción
+log_reg=LogisticRegression()
+log_reg = LogisticRegression(solver = 'lbfgs',max_iter=10000).fit(x_entre,y_entre.ravel())
+y_pred=log_reg.predict(x_prueba)
+y_pred
+y_prueba
+accuracy_score(y_prueba,y_pred)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
 
-
 ## Ahora quiero entrar a la parte chida del proyecto. Hay algunos datos que no están en modo dummy, por ejemplo, los videos, el alumno,
 ## entonces, estos hay que hacerlos dummies.
+
+
+
+## Pruebas utilizando muestreo con el comando sample
+df = pd.DataFrame({'num_legs': [2, 4, 8, 0],'num_wings': [2, 0, 0, 0],'num_specimen_seen': [10, 2, 1, 8]},index=['falcon', 'dog', 'spider', 'fish'])
+df
+df.sample(frac=0.9,replace=False,random_state=5)
+
+
+
+
+
+
+X, y = np.arange(10).reshape((5, 2)), range(5)
+X
+list(y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+X_train
+X_test
+y_train
+y_test
