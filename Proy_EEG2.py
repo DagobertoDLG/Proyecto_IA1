@@ -50,7 +50,11 @@ plt.show()
 
 
 
-# Realizamos una prueba para
+# Realizamos una prueba para identificar si está confundido o no
+datos_demogr=pd.read_csv("Datos/demographic_info.csv")
+datos_EEG=pd.read_csv("Datos/EEG_data.csv")
+datos_EEG=datos_EEG.drop(['VideoID','Attention','Mediation','Raw','predefinedlabel','user-definedlabeln'],axis=1)
+
 datos_EEG=pd.read_csv("Datos/EEG_data.csv")
 datos_EEG=datos_EEG.drop(['SubjectID','VideoID','Attention','Mediation','Raw','predefinedlabel'],axis=1)
 x=datos_EEG.drop(["user-definedlabeln"],axis=1)    # Entrada no considera el sujeto, solo sus características
@@ -65,3 +69,39 @@ clf.fit(x_entre, y_entre.ravel())
 y_pred=clf.predict(x_prueba)
 print("La predicción de si el alumno está confundido o no es de : ")
 print(accuracy_score(y_prueba,y_pred))
+
+
+
+
+
+
+
+# Realizamos una prueba para identificar si está confundido o no
+from sklearn.linear_model import SGDClassifier
+datos_EEG=pd.read_csv("Datos/EEG_data.csv")
+datos_EEG=datos_EEG.drop(['VideoID','Attention','Mediation','Raw','predefinedlabel','user-definedlabeln'],axis=1)
+x=datos_EEG.drop(["SubjectID"],axis=1)    # Entrada no considera el sujeto, solo sus características
+y=datos_EEG[["SubjectID"]]    # Salida, quién es el sujeto
+x_entre, x_prueba, y_entre, y_prueba = train_test_split(x.values, y.values, test_size=z, random_state=25)
+# x_entre es la Matriz de entrada para las características
+# y_entre es la Matriz de salida
+# x_prueba es la matriz de pruebas
+# y_prueba es la matriz de salida que supone debería ser, NO es la que se predice
+clf = make_pipeline(StandardScaler(),SGDClassifier(max_iter=100000, tol=1e-3))
+clf.fit(x_entre, y_entre.ravel())
+y_pred=clf.predict(x_prueba)
+print(accuracy_score(y_prueba,y_pred))
+
+
+
+
+
+!pip install --upgrade tensorflow_hub
+
+import tensorflow_hub as hub
+
+model = hub.KerasLayer("https://tfhub.dev/google/nnlm-en-dim128/2")
+embeddings = model(["The rain in Spain.", "falls",
+"mainly", "In the plain!"])
+
+print(embeddings.shape)  #(4,128)
